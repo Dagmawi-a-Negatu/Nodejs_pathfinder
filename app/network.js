@@ -52,42 +52,47 @@ function Link(routeName, station, distance){
 
 function network(){
     let jsonData = railway.readData('notional_ra.json');
-    let routes = jsonData.routes;
         
     let graph = {
                     stationArray : []   // graph object with stationArray property
                 };
-    /* initializes current station */
-    let currentStation;
-
 
     /* Iterates through each route */
     for (let route of jsonData.routes) {
-        let nextStation; // Store the previous station for each route
-        let secondPrevious;
+        let nextStation; // Store the next station for each route
+        
         /* Iterates through each stop on each route */
         for (let stop of route.stops) {
             // Check if the station is in the graph, based on stationID
-            let currentStation = graph.stationArray.find(station => station.stationID === stop.stationID);
+            let stationIndex = graph.stationArray.findIndex(station => station.stationID === stop.stationID);
+            let currentStation;
 
-            if (!currentStation) {
+            if (stationIndex === -1) {
                 // If the station doesn't exist in the graph, create and add it
                 currentStation = new Station(stop.stationID, stop.stationName);
                 graph.stationArray.push(currentStation);
+            } else {
+                // Reference the existing station from the graph
+                currentStation = graph.stationArray[stationIndex];
             }
 
-            // Now that the current station is in the graph, you can add links
+            // Add links between current station and the next station
             if (nextStation) {
-                let link1 = new Link(route.name, nextStation, stop.distanceToPrev);
-                currentStation.addLink(link1);
+                // Assuming distanceToNext is from current to next, and distanceToPrev is from next to current
+                let linkToNext = new Link(route.name, nextStation, stop.distanceToNext || 0); // if distanceToNext is undefined, default to 0
+                let linkToCurrent = new Link(route.name, currentStation, stop.distanceToPrev || 0); // if distanceToPrev is undefined, default to 0
+                
+                currentStation.addLink(linkToNext);
+                nextStation.addLink(linkToCurrent);
             }
 
             nextStation = currentStation;
-
         }
     }
 
+    return graph; // Return the constructed graph
 }
+
 
 
 /**
