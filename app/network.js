@@ -9,7 +9,7 @@
 const railway = require('./railway.js');
 
 // Example of testing the readData function
-console.log(railway.readData('notional_ra.json')); // Should log the message from readData and return true
+//console.log(railway.readData('notional_ra.json')); // Should log the message from readData and return true
 
 
 /**
@@ -24,7 +24,7 @@ function Station(stationID, stationName){
     this.stationName = stationName;
     this.stationID = stationID;
     this.links = [];
- }//end station
+}//end station
  
 /**
 *This function adds a link to a station.
@@ -40,17 +40,18 @@ Station.prototype.addLink = function(link){
  * the stations to become notes on a graph. Essentially in graph theory  the
  * stations are the nodes and the Link objects are the edges.
  **/
- function Link(routeName, station, distance){
+
+function Link(routeName, station, distance){
      this.routeName = routeName;
      this.distance = distance;
      this.station = station;
-     this.linklName = station.stationName;
- }//end link
+     const railway = require('./railway.js');this.linklName = station.stationName;
+}//end link
  
  //THE REST OF YOUR CODE GOES BELOW HERE
 
-function network(fileName){
-    let jsondata = railway.readData(fileName);
+function network(){
+    let jsonData = railway.readData('notional_ra.json');
     let routes = jsonData.routes;
         
     let graph = {
@@ -89,4 +90,20 @@ function network(fileName){
 }
 
 
+/**
+ * Prints the railway network graph in a readable format.
+ * It iterates through each station in the graph and prints its connections (links) to other stations.
+ */
+function printNetworkGraph(graph) {
+    console.log("Railway Network Graph:");
+    for (const station of graph.stationArray) {
+        console.log(`Station: ${station.stationName} (ID: ${station.stationID})`);
+        console.log("Links:");
+        for (const link of station.links) {
+            console.log(`  - To: ${link.station.stationName} (ID: ${link.station.stationID}), Distance: ${link.distance}, Route: ${link.routeName}`);
+        }
+        console.log(""); // Adds an empty line for better readability
+    }
+}
 
+printNetworkGraph(network());
