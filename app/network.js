@@ -3,7 +3,7 @@
  * Author: PUT YOUR NAME HERE.
  *
  * Describe this module here.
- **/
+**/
 
 
 const railway = require('./railway.js');
@@ -45,49 +45,10 @@ function Link(routeName, station, distance){
      this.routeName = routeName;
      this.distance = distance;
      this.station = station;
-     const railway = require('./railway.js');this.linklName = station.stationName;
 }//end link
  
  //THE REST OF YOUR CODE GOES BELOW HERE
 
-function network(){
-    let jsonData = railway.readData('notional_ra.json');
-    let routes = jsonData.routes;
-        
-    let graph = {
-                    stationArray : []   // graph object with stationArray property
-                };
-    /* initializes current station */
-    let currentStation;
-
-
-    /* Iterates through each route */
-    for (let route of jsonData.routes) {
-        let nextStation; // Store the previous station for each route
-        let secondPrevious;
-        /* Iterates through each stop on each route */
-        for (let stop of route.stops) {
-            // Check if the station is in the graph, based on stationID
-            let currentStation = graph.stationArray.find(station => station.stationID === stop.stationID);
-
-            if (!currentStation) {
-                // If the station doesn't exist in the graph, create and add it
-                currentStation = new Station(stop.stationID, stop.stationName);
-                graph.stationArray.push(currentStation);
-            }
-
-            // Now that the current station is in the graph, you can add links
-            if (nextStation) {
-                let link1 = new Link(route.name, nextStation, stop.distanceToPrev);
-                currentStation.addLink(link1);
-            }
-
-            nextStation = currentStation;
-
-        }
-    }
-
-}
 
 
 /**
@@ -96,6 +57,7 @@ function network(){
  */
 function printNetworkGraph(graph) {
     console.log("Railway Network Graph:");
+    console.log(graph.stationArray[0]);
     for (const station of graph.stationArray) {
         console.log(`Station: ${station.stationName} (ID: ${station.stationID})`);
         console.log("Links:");
