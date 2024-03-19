@@ -49,6 +49,52 @@ function Link(routeName, station, distance){
  
  //THE REST OF YOUR CODE GOES BELOW HERE
 
+function network(){
+    let jsonData = railway.readData('notional_ra.json');
+        
+    let graph = {
+                    stationArray : []   // graph object with stationArray property
+                };
+
+    /* Iterates through each route */
+    for (let route of jsonData.routes) {
+        let previousStation; // Store the next station for each route
+        
+        /* Iterates through each stop on each route */
+        for (let stop of route.stops) {
+            // Check if the station is in the graph, based on stationID
+            let stationIndex = graph.stationArray.findIndex(station => station.stationID === stop.stationID);
+            let currentStation;
+
+            if (stationIndex === -1) {
+                // If the station doesn't exist in the graph, create and add it
+                currentStation = new Station(stop.stationID, stop.stationName);
+                graph.stationArray.push(currentStation);
+            } else {
+                // Reference the existing station from the graph
+                currentStation = graph.stationArray[stationIndex];
+            }
+
+            // Add links between current station and the next station
+            if (previousStation) {
+                // Assuming distanceToNext is from current to next, and distanceToPrev is from next to current
+                let linkFromPreviousToCurrent = 
+                new Link(route.name, previousStation, stop.distanceToNext || 0); // if distanceToNext is undefined, default to 0
+                let linkFromCurrentToPrevious
+                = new Link(route.name, currentStation, stop.distanceToPrev || 0); // if distanceToPrev is undefined, default to 0
+                
+                currentStation.addLink(linkFromPreviousToCurrent);
+                previousStation.addLink(linkFromCurrentToPrevious);
+            }
+
+            previousStation = currentStation;
+        }
+    }
+
+    return graph; // Return the constructed graph
+}
+
+
 
 
 /**
