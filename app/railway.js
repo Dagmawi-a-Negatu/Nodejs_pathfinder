@@ -43,7 +43,7 @@
 function readData(fileName) {
     // Import the fs (File System) module to work within computer's file system.
     const fs = require('fs');
-
+    
     let jsonData = null; // Variable to hold the parsed JavaScript object.
 
     try {
@@ -599,6 +599,26 @@ function calculateDistance(stops, fromIndex, toIndex) {
     //Returns the complete distance between the passed indexes	
     return distance;
 }
+
+
+
+module.exports = {
+    readData,
+    getNetworkName,
+    getRoutes,
+    getRouteNames,
+    routeNamesToString,
+    routeSummary,
+    getRoute,
+    totalStations,
+    routeToString,
+    routeDistance,
+    findLongestRoute,
+    addDistances,
+    sortRoutesByName,
+    sortRoutesByLength
+};
+
 
 
 
