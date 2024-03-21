@@ -78,6 +78,31 @@ Journey.prototype.copy = function(){
     return copy;
 }
 
+// Generates and displays a journey report
+journey.prototype.report = function() {
+    let journeySummary = "Journey Summary\n===============\n";
+    if (this.stations.length > 0) {
+      journeySummary += `Embark at ${this.stations[0]} on ${this.text}\n`;
+      for (let i = 1; i < this.stations.length - 1; i++) {
+        journeySummary += `At ${this.stations[i]} change to next route\n`;
+      }
+      journeySummary += `Arrive at ${this.stations[this.stations.length - 1]}\n`;
+    }
+    journeySummary += `Total distance: ${this.distance}\n`;
+    journeySummary += `Changes: ${this.changes}\n`;
+    journeySummary += `Passing through: ${this.stations.join(", ")}\n`;
+    console.log(journeySummary);
+    return journeySummary; // Useful for testing
+  }
+}
+
+// Increments the distance of the journey
+  incDistance(amt) {
+    if (typeof amt === 'number' && amt > 0) {
+      this.distance += amt;
+    }
+  }
+
 function network(){
     let jsonData = railway.readData('notional_ra.json');
         
