@@ -49,37 +49,29 @@ function Link(routeName, station, distance){
  
  //THE REST OF YOUR CODE GOES BELOW HERE
  
- function Journey(){
+ 
 
+function Journey() {
     this.stations = [];      // An array of all stations on this journey
     this.distance = 0;       // The total distance of the journey in miles
     this.text = "";          // Description of the journey
-    this.success = false; //Indicates if the destination was reached
-    this.changes = 0; //Number of route changes
+    this.success = false;    // Indicates if the destination was reached
+    this.changes = 0;        // Number of route changes
 }
 
-//--------------------Object Journey Functions----------------------
-
-
-/**
- * This function creates a shallow copy of the journey object and returns
- * another instance of Journey.
- */
-Journey.prototype.copy = function(){
-
+// This function creates a shallow copy of the journey object and returns another instance of Journey.
+Journey.prototype.copy = function() {
     let newJourney = new Journey();
-
     newJourney.stations = this.stations.slice();
     newJourney.distance = this.distance;
-    newJounrney.text = this.text;
+    newJourney.text = this.text; // Corrected typo from newJounrney to newJourney
     newJourney.success = this.success;
     newJourney.changes = this.changes;
-
-    return copy;
-}
+    return newJourney; // Corrected from return copy; to return newJourney;
+};
 
 // Generates and displays a journey report
-journey.prototype.report = function() {
+Journey.prototype.report = function() {
     let journeySummary = "Journey Summary\n===============\n";
     if (this.stations.length > 0) {
       journeySummary += `Embark at ${this.stations[0]} on ${this.text}\n`;
@@ -93,16 +85,17 @@ journey.prototype.report = function() {
     journeySummary += `Passing through: ${this.stations.join(", ")}\n`;
     console.log(journeySummary);
     return journeySummary; // Useful for testing
-  }
-}
+};
 
 // Increments the distance of the journey
-  incDistance(amt) {
+Journey.prototype.incDistance = function(amt) {
     if (typeof amt === 'number' && amt > 0) {
-      this.distance += amt;
+        this.distance += amt;
     }
-  }
+}
 
+
+ 
 function network(){
     let jsonData = railway.readData('notional_ra.json');
         
