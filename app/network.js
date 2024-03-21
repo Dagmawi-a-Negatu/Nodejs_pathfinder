@@ -48,6 +48,35 @@ function Link(routeName, station, distance){
 }//end link
  
  //THE REST OF YOUR CODE GOES BELOW HERE
+ 
+ function Journey(){
+
+    this.stations = [];      // An array of all stations on this journey
+    this.distance = 0;       // The total distance of the journey in miles
+    this.text = "";          // Description of the journey
+    this.success = false; //Indicates if the destination was reached
+    this.changes = 0; //Number of route changes
+}
+
+//--------------------Object Journey Functions----------------------
+
+
+/**
+ * This function creates a shallow copy of the journey object and returns
+ * another instance of Journey.
+ */
+Journey.prototype.copy = function(){
+
+    let newJourney = new Journey();
+
+    newJourney.stations = this.stations.slice();
+    newJourney.distance = this.distance;
+    newJounrney.text = this.text;
+    newJourney.success = this.success;
+    newJourney.changes = this.changes;
+
+    return copy;
+}
 
 function network(){
     let jsonData = railway.readData('notional_ra.json');
