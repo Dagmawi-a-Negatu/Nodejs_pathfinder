@@ -141,7 +141,46 @@ function network(){
     return graph; // Return the constructed graph
 }
 
+function getBestJourney(graph, origin, destination, max_results){
 
+    let possibleJourneys = [];
+    let originObject = graph.stationArray.find(i => i.stationName === origin);
+    let destinationObject = graph.stationArray.find(i => i.stationName === destination);
+    let currentJourney = new Journey();
+    let initialRouteName = null;
+
+
+
+    initialRouteName = graph.stationArray.find(i => i.stationName === origin).links[0].routeName;
+
+
+    getJourneys(graph, originObject, destinationObject, currentJourney, possibleJourneys, initialRouteName);
+
+
+    /* sorts the routes */
+    possibleJourneys.sort((a,b) => {
+
+        /* compares by the number of changes */
+        if(a.changes < b.changes){
+
+            return -1;
+        }
+        if(b.changes > a.changes){
+            return 1;
+        }
+
+          /* compares by distance length if number of changes are equal */
+        if(a.distance < b.distance){
+            return -1;
+        }
+        if(b.distance > a.distance){
+            return 1;
+        }
+        return 0;
+    })
+
+    return possibleJourneys;
+}
 
 
 /**
