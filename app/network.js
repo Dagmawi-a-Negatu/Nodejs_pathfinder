@@ -62,13 +62,13 @@ function Journey() {
 // This function creates a shallow copy of the journey object and returns another instance of Journey.
 Journey.prototype.copy = function() {
     let newJourney = new Journey();
-    newJourney.stations = this.stations.slice();
+    newJourney.stations = this.stations.slice()
     newJourney.distance = this.distance;
     newJourney.text = this.text; // Corrected typo from newJounrney to newJourney
     newJourney.success = this.success;
     newJourney.changes = this.changes;
     return newJourney; // Corrected from return copy; to return newJourney;
-};
+}
 
 // Generates and displays a journey report
 Journey.prototype.report = function() {
@@ -85,7 +85,7 @@ Journey.prototype.report = function() {
     journeySummary += `Passing through: ${this.stations.join(", ")}\n`;
     console.log(journeySummary);
     return journeySummary; // Useful for testing
-};
+}
 
 // Increments the distance of the journey
 Journey.prototype.incDistance = function(amt) {
@@ -97,7 +97,7 @@ Journey.prototype.incDistance = function(amt) {
 
  
 function network(){
-    let jsonData = railway.readData('notional_ra.json');
+    let jsonData = railway.readData('railtrack_uk.json');
         
     let graph = {
                     stationArray : []   // graph object with stationArray property
@@ -126,7 +126,7 @@ function network(){
             if (previousStation) {
                 // Assuming distanceToNext is from current to next, and distanceToPrev is from next to current
                 let linkFromPreviousToCurrent = 
-                new Link(route.name, previousStation, stop.distanceToNext || 0); // if distanceToNext is undefined, default to 0
+                new Link(route.name, previousStation, stop.distanceToNext || stop.distanceToPrev || 0); // if distanceToNext is undefined, default to 0
                 let linkFromCurrentToPrevious
                 = new Link(route.name, currentStation, stop.distanceToPrev || 0); // if distanceToPrev is undefined, default to 0
                 
@@ -150,38 +150,68 @@ function getBestJourney(graph, origin, destination, max_results){
     let initialRouteName = null;
 
 
-
+    currentJourney.stations.push(originObject);
+    
     initialRouteName = graph.stationArray.find(i => i.stationName === origin).links[0].routeName;
 
+    doGetBestRoutes(graph, originObject, destinationObject, currentJourney, possibleJourneys, initialRouteName);
 
-    getJourneys(graph, originObject, destinationObject, currentJourney, possibleJourneys, initialRouteName);
+    //console.log(possibleJourneys.stations);	
 
-
-    /* sorts the routes */
-    possibleJourneys.sort((a,b) => {
-
-        /* compares by the number of changes */
-        if(a.changes < b.changes){
-
-            return -1;
-        }
-        if(b.changes > a.changes){
-            return 1;
-        }
-
-          /* compares by distance length if number of changes are equal */
-        if(a.distance < b.distance){
-            return -1;
-        }
-        if(b.distance > a.distance){
-            return 1;
-        }
-        return 0;
-    })
-
-    return possibleJourneys;
 }
 
+getBestJourney(network(), "Truro", "Oban", 10);
+
+function doGetBestRoutes(graph, origin, destination, currentJourney, routesFound, routeName) {
+    // Check if we've reached the destination
+    
+    let journeyForThisPath;    
+    
+    if (origin.stationName === destination.stationName ) {
+ 
+        // Mark the journey as successful and store i
+        currentJourney.success = true; // Indicates if the destination was reached successfully
+        routesFound.push(currentJourney); // Push a clone to preserve the state at this endpoint
+        if(currentJourney.distance < 900)	{
+	         console.log(currentJourney.stations);
+		 console.log(currentJourney.distance);
+		 console.log("\n");
+	     
+	} 
+	//console.log(currentJourney.text);
+        return;
+  }
+
+
+// Assuming you adjust your currentJourney.stations to store objects rather than just names
+// Each object in the stations array could look like { name: "StationName", distance: 123 }
+
+
+
+     for (let link of origin.links) {
+    	if (!currentJourney.stations.find(station => station.name === link.station.stationName)) {
+            // Create a copy for this path
+            currentJourney = currentJourney.copy();
+
+            // Add the station along with the distance to it
+                currentJourney.stations.push({ name: link.station.stationName, distance: link.distance });
+        	currentJourney.distance += link.distance;
+
+        	doGetBestRoutes(graph, link.station, destination, currentJourney, routesFound, origin.routeName);
+
+        	if (!currentJourney.success) {
+            		currentJourney.stations.pop();
+			currentJourney.distance -= link.distance;
+        	}
+    	}
+     }
+
+   
+
+}
+
+
+    
 
 /**
  * Prints the railway network graph in a readable format.
