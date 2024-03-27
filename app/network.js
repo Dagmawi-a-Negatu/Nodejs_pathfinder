@@ -97,7 +97,7 @@ Journey.prototype.incDistance = function(amt) {
 
  
 function network(){
-    let jsonData = railway.readData('railtrack_uk.json');
+    let jsonData = railway.readData('notional_ra.json');
         
     let graph = {
                     stationArray : []   // graph object with stationArray property
@@ -156,36 +156,37 @@ function getBestJourney(graph, origin, destination, max_results){
 
     doGetBestRoutes(graph, originObject, destinationObject, currentJourney, possibleJourneys, initialRouteName);
 
-    //console.log(possibleJourneys.stations);	
 
+    // After doGetBestRoutes finishes, sort the possibleJourneys
+    possibleJourneys.sort((a, b) => {
+        if (a.changes < b.changes) return -1;
+        if (a.changes > b.changes) return 1;
+        return a.distance - b.distance;
+    });
+
+    // Slice the sorted array to get the top n results based on max_results
+    let topNResults = possibleJourneys.slice(0, max_results);
+
+    displayRoutes(topNResults); // Return the top n sorted journeys
 }
 
-getBestJourney(network(), "Truro", "Oban", 10);
+    
+
+
+
+getBestJourney(network(), "Tyson", "Tadcaster", 2);
 
 function doGetBestRoutes(graph, origin, destination, currentJourney, routesFound, routeName) {
     // Check if we've reached the destination
-    
-    let journeyForThisPath;    
+      
     
     if (origin.stationName === destination.stationName ) {
  
         // Mark the journey as successful and store i
         currentJourney.success = true; // Indicates if the destination was reached successfully
         routesFound.push(currentJourney); // Push a clone to preserve the state at this endpoint
-        if(currentJourney.distance < 900)	{
-	         console.log(currentJourney.stations);
-		 console.log(currentJourney.distance);
-		 console.log("\n");
-	     
-	} 
-	//console.log(currentJourney.text);
-        return;
-  }
-
-
-// Assuming you adjust your currentJourney.stations to store objects rather than just names
-// Each object in the stations array could look like { name: "StationName", distance: 123 }
-
+	return;
+    }
 
 
      for (let link of origin.links) {
@@ -196,20 +197,53 @@ function doGetBestRoutes(graph, origin, destination, currentJourney, routesFound
             // Add the station along with the distance to it
                 currentJourney.stations.push({ name: link.station.stationName, distance: link.distance });
         	currentJourney.distance += link.distance;
+                // Potentially, add a placeholder or marker for a route change text
+        	let previousText = currentJourney.text;
+		let previousChanges = currentJourney.changes;
+        	// Check for a route change and adjust the text and changes counter
+    		if (link.routeName !== routeName) {
+        		currentJourney.changes++; // Add a new checkpoint with an incremented change count
+        		currentJourney.text += `At ${origin.stationName}, change to ${link.routeName}. `;
+    		}
 
-        	doGetBestRoutes(graph, link.station, destination, currentJourney, routesFound, origin.routeName);
+        	
+		doGetBestRoutes(graph, link.station, destination, currentJourney, routesFound, link.routeName);
 
-        	if (!currentJourney.success) {
+        	//Restore the text, stations, changes and distance before a failed explore
+		if (!currentJourney.success && origin.links.length > 1) {
             		currentJourney.stations.pop();
+			currentJourney.changes = previousChanges;
+			currentJourney.text = previousText; 
 			currentJourney.distance -= link.distance;
         	}
+
     	}
      }
 
-   
-
 }
 
+function displayRoutes(topNResults) {
+    console.log(`Routes found: ${topNResults.length}`);
+    topNResults.forEach((journey, index) => {
+        console.log(`${index + 1}:`);
+        console.log(`Route Summary`);
+        console.log(`==============`);
+        // Embark message
+        console.log(`Embark at ${journey.stations[0].name} on ${journey.stations[0].routeName}`);
+        // Insert journey text which includes changes
+        console.log(journey.text.trim());
+        // Arrive message
+        console.log(`Arrive at ${journey.stations[journey.stations.length - 1].name}`);
+        // Total distance
+        console.log(`Total distance :${journey.distance}`);
+        // Number of changes
+        console.log(`Changes :${journey.changes}`);
+        // Passing through
+        let stationNames = journey.stations.map(station => station.name).join(', ');
+        console.log(`Passing through: ${stationNames}`);
+        console.log(); // For spacing between routes
+    });
+}
 
     
 
@@ -230,4 +264,4 @@ function printNetworkGraph(graph) {
     }
 }
 
-printNetworkGraph(network());
+//printNetworkGraph(network());
