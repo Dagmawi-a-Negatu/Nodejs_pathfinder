@@ -1,6 +1,6 @@
 
 /**
- * Author: PUT YOUR NAME HERE.
+ * Author: Dagmawi Negatu.
  *
  * Describe this module here.
 **/
@@ -10,6 +10,42 @@ const railway = require('./railway.js');
 
 // Example of testing the readData function
 //console.log(railway.readData('notional_ra.json')); // Should log the message from readData and return true
+
+
+// Main function to process command-line arguments and output the route
+function main() {
+    if (process.argv.length !== 6) {
+        console.log('Usage: nodejs network.js <railtrack_file.json> <origin> <destination> <max_transfers>');
+        process.exit(1);
+    }
+
+    const [,, filename, origin, destination, maxTransfers] = process.argv;
+    let graph = network(filename);
+
+    // Ensure maxTransfers is a number
+    if (isNaN(maxTransfers)) {
+        console.error('The max transfers argument must be a number.');
+        process.exit(1);
+    }
+
+    const originObject = graph.stationArray.find(station => station.stationName === origin);
+    const destinationObject = graph.stationArray.find(station => station.stationName === destination);
+
+    if (!originObject || !destinationObject) {
+        console.error('One or more station cannot be found on this network \n\nRoutes found: 0');
+	process.exit(1);
+    }
+
+    const possibleJourneys = getBestJourney(graph, origin, destination, maxTransfers);
+    displayRoutes(possibleJourneys);
+}
+/**
+*This function adds a link to a station.
+*@param {object} link The link object representing a link to another station.
+**/
+Station.prototype.addLink = function(link){
+        this.links.push(link);
+}
 
 
 /**
@@ -26,13 +62,6 @@ function Station(stationID, stationName){
     this.links = [];
 }//end station
  
-/**
-*This function adds a link to a station.
-*@param {object} link The link object representing a link to another station.
-**/
-Station.prototype.addLink = function(link){
-        this.links.push(link);
-}
 
 
 /**
@@ -70,23 +99,6 @@ Journey.prototype.copy = function() {
     return newJourney; // Corrected from return copy; to return newJourney;
 }
 
-// Generates and displays a journey report
-Journey.prototype.report = function() {
-    let journeySummary = "Journey Summary\n===============\n";
-    if (this.stations.length > 0) {
-      journeySummary += `Embark at ${this.stations[0]} on ${this.text}\n`;
-      for (let i = 1; i < this.stations.length - 1; i++) {
-        journeySummary += `At ${this.stations[i]} change to next route\n`;
-      }
-      journeySummary += `Arrive at ${this.stations[this.stations.length - 1]}\n`;
-    }
-    journeySummary += `Total distance: ${this.distance}\n`;
-    journeySummary += `Changes: ${this.changes}\n`;
-    journeySummary += `Passing through: ${this.stations.join(", ")}\n`;
-    console.log(journeySummary);
-    return journeySummary; // Useful for testing
-}
-
 // Increments the distance of the journey
 Journey.prototype.incDistance = function(amt) {
     if (typeof amt === 'number' && amt > 0) {
@@ -96,16 +108,16 @@ Journey.prototype.incDistance = function(amt) {
 
 
  
-function network(){
-    let jsonData = railway.readData('notional_ra.json');
-        
+function network(fileName){
+     let jsonData = railway.readData(fileName);
+
     let graph = {
                     stationArray : []   // graph object with stationArray property
                 };
 
     /* Iterates through each route */
     for (let route of jsonData.routes) {
-        let previousStation; // Store the next station for each route
+        let previousStation; // Store the previous station for each route
         
         /* Iterates through each stop on each route */
         for (let stop of route.stops) {
@@ -123,13 +135,12 @@ function network(){
             }
 
             // Add links between current station and the next station
-            if (previousStation) {
-                // Assuming distanceToNext is from current to next, and distanceToPrev is from next to current
-                let linkFromPreviousToCurrent = 
-                new Link(route.name, previousStation, stop.distanceToNext || stop.distanceToPrev || 0); // if distanceToNext is undefined, default to 0
+            if (previousStation) {                                                                                                                   // Assuming distanceToNext is from current to next, and distanceToPrev is from next to current
+                let linkFromPreviousToCurrent =
+                new Link(route.name, previousStation, stop.distanceToPrev || 0); // if distanceToNext is undefined, default to 0
                 let linkFromCurrentToPrevious
                 = new Link(route.name, currentStation, stop.distanceToPrev || 0); // if distanceToPrev is undefined, default to 0
-                
+
                 currentStation.addLink(linkFromPreviousToCurrent);
                 previousStation.addLink(linkFromCurrentToPrevious);
             }
@@ -149,11 +160,9 @@ function getBestJourney(graph, origin, destination, max_results){
     let currentJourney = new Journey();
     let initialRouteName = null;
 
-
-    currentJourney.stations.push(originObject);
     
     initialRouteName = graph.stationArray.find(i => i.stationName === origin).links[0].routeName;
-
+   
     doGetBestRoutes(graph, originObject, destinationObject, currentJourney, possibleJourneys, initialRouteName);
 
 
@@ -167,14 +176,10 @@ function getBestJourney(graph, origin, destination, max_results){
     // Slice the sorted array to get the top n results based on max_results
     let topNResults = possibleJourneys.slice(0, max_results);
 
-    displayRoutes(topNResults); // Return the top n sorted journeys
+    return (topNResults);
 }
 
     
-
-
-
-getBestJourney(network(), "Tyson", "Tadcaster", 2);
 
 function doGetBestRoutes(graph, origin, destination, currentJourney, routesFound, routeName) {
     // Check if we've reached the destination
@@ -185,6 +190,7 @@ function doGetBestRoutes(graph, origin, destination, currentJourney, routesFound
         // Mark the journey as successful and store i
         currentJourney.success = true; // Indicates if the destination was reached successfully
         routesFound.push(currentJourney); // Push a clone to preserve the state at this endpoint
+	
 	return;
     }
 
@@ -194,16 +200,30 @@ function doGetBestRoutes(graph, origin, destination, currentJourney, routesFound
             // Create a copy for this path
             currentJourney = currentJourney.copy();
 
-            // Add the station along with the distance to it
-                currentJourney.stations.push({ name: link.station.stationName, distance: link.distance });
-        	currentJourney.distance += link.distance;
-                // Potentially, add a placeholder or marker for a route change text
-        	let previousText = currentJourney.text;
-		let previousChanges = currentJourney.changes;
+		if (currentJourney.stations.length === 0) {
+                    currentJourney.stations.push({ name: origin.stationName, distance: 0});
+
+                } 
+               
+		
+		currentJourney.stations.push({ name: link.station.stationName, distance: link.distance });
+		
+		currentJourney.distance += link.distance;
+
+               // Potentially, add a placeholder or marker for a route change text
+                let previousText = currentJourney.text;
+                let previousChanges = currentJourney.changes;
+
+		if (currentJourney.stations.length === 2) {
+                    currentJourney.text +=  `Embark at ${origin.stationName} on ${link.routeName}. \n`;
+
+                }
         	// Check for a route change and adjust the text and changes counter
     		if (link.routeName !== routeName) {
-        		currentJourney.changes++; // Add a new checkpoint with an incremented change count
-        		currentJourney.text += `At ${origin.stationName}, change to ${link.routeName}. `;
+			if(currentJourney.stations.length > 2){
+        			currentJourney.changes++; // Add a new checkpoint with an incremented change count
+        			currentJourney.text += `At ${origin.stationName}, change to ${link.routeName}. `;
+			}
     		}
 
         	
@@ -211,10 +231,10 @@ function doGetBestRoutes(graph, origin, destination, currentJourney, routesFound
 
         	//Restore the text, stations, changes and distance before a failed explore
 		if (!currentJourney.success && origin.links.length > 1) {
-            		currentJourney.stations.pop();
+            		let failedStation = currentJourney.stations.pop();
 			currentJourney.changes = previousChanges;
 			currentJourney.text = previousText; 
-			currentJourney.distance -= link.distance;
+			currentJourney.distance -= failedStation.distance;
         	}
 
     	}
@@ -229,7 +249,6 @@ function displayRoutes(topNResults) {
         console.log(`Route Summary`);
         console.log(`==============`);
         // Embark message
-        console.log(`Embark at ${journey.stations[0].name} on ${journey.stations[0].routeName}`);
         // Insert journey text which includes changes
         console.log(journey.text.trim());
         // Arrive message
@@ -264,4 +283,4 @@ function printNetworkGraph(graph) {
     }
 }
 
-//printNetworkGraph(network());
+main();
