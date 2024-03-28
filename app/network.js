@@ -182,65 +182,60 @@ function getBestJourney(graph, origin, destination, max_results){
     
 
 function doGetBestRoutes(graph, origin, destination, currentJourney, routesFound, routeName) {
-    // Check if we've reached the destination
-      
-    
-    if (origin.stationName === destination.stationName ) {
- 
-        // Mark the journey as successful and store i
-        currentJourney.success = true; // Indicates if the destination was reached successfully
-        routesFound.push(currentJourney); // Push a clone to preserve the state at this endpoint
-	
-	return;
+    if (origin.stationName === destination.stationName) {
+        currentJourney.success = true;
+        routesFound.push(currentJourney.copy());
+        return;
     }
 
+    for (let link of origin.links) {
+        if (!currentJourney.stations.find(station => station.name === link.station.stationName)) {
+            let tempJourney = currentJourney.copy();
 
-     for (let link of origin.links) {
-    	if (!currentJourney.stations.find(station => station.name === link.station.stationName)) {
-            // Create a copy for this path
-            currentJourney = currentJourney.copy();
+            let journeyUpdate = {
+                previousText: tempJourney.text,
+                previousChanges: tempJourney.changes
+            };
 
-		if (currentJourney.stations.length === 0) {
-                    currentJourney.stations.push({ name: origin.stationName, distance: 0});
+            updateCurrentJourney(tempJourney, origin, link, routeName, journeyUpdate);
 
-                } 
-               
-		
-		currentJourney.stations.push({ name: link.station.stationName, distance: link.distance });
-		
-		currentJourney.distance += link.distance;
+            doGetBestRoutes(graph, link.station, destination, tempJourney, routesFound, link.routeName);
 
-               // Potentially, add a placeholder or marker for a route change text
-                let previousText = currentJourney.text;
-                let previousChanges = currentJourney.changes;
-
-		if (currentJourney.stations.length === 2) {
-                    currentJourney.text +=  `Embark at ${origin.stationName} on ${link.routeName}. \n`;
-
-                }
-        	// Check for a route change and adjust the text and changes counter
-    		if (link.routeName !== routeName) {
-			if(currentJourney.stations.length > 2){
-        			currentJourney.changes++; // Add a new checkpoint with an incremented change count
-        			currentJourney.text += `At ${origin.stationName}, change to ${link.routeName}. `;
-			}
-    		}
-
-        	
-		doGetBestRoutes(graph, link.station, destination, currentJourney, routesFound, link.routeName);
-
-        	//Restore the text, stations, changes and distance before a failed explore
-		if (!currentJourney.success && origin.links.length > 1) {
-            		let failedStation = currentJourney.stations.pop();
-			currentJourney.changes = previousChanges;
-			currentJourney.text = previousText; 
-			currentJourney.distance -= failedStation.distance;
-        	}
-
-    	}
-     }
-
+            if (!tempJourney.success && origin.links.length > 1) {
+                handleFailedExploration(tempJourney, journeyUpdate);
+            }
+        }
+    }
 }
+
+function updateCurrentJourney(currentJourney, origin, link, routeName, journeyUpdate) {
+    if (currentJourney.stations.length === 0) {
+        currentJourney.stations.push({ name: origin.stationName, distance: 0 });
+    }
+
+    currentJourney.stations.push({ name: link.station.stationName, distance: link.distance });
+    currentJourney.distance += link.distance;
+
+    if (currentJourney.stations.length === 2) {
+        currentJourney.text += `Embark at ${origin.stationName} on ${link.routeName}. \n`;
+    }
+
+    if (link.routeName !== routeName && currentJourney.stations.length > 2) {
+        currentJourney.changes++;
+        currentJourney.text += `At ${origin.stationName}, change to ${link.routeName}. `;
+    }
+}
+
+function handleFailedExploration(currentJourney, journeyUpdate) {
+    let failedStation = currentJourney.stations.pop();
+    currentJourney.changes = journeyUpdate.previousChanges;
+    currentJourney.text = journeyUpdate.previousText;
+    currentJourney.distance -= failedStation.distance;
+}
+
+
+
+    
 
 function displayRoutes(topNResults) {
     console.log(`Routes found: ${topNResults.length}`);
