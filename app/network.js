@@ -59,7 +59,7 @@ function main() {
     // Check if the correct number of arguments are passed
     if (process.argv.length !== 6) {
         console.log
-        ('Usage: nodejs network.js <railtrack_file.json> <origin> <destination> <max>');
+    ('Usage: nodejs network.js <railtrack_file.json> <origin> <destination> <max>');
         process.exit(1);
     }
 
@@ -83,7 +83,8 @@ function main() {
 
     // Check if both origin and destination exist in the network
     if (!originObject || !destinationObject) {
-        console.error('One or more station cannot be found on this network \n\nRoutes found: 0');
+        console.error(
+	'One or more station cannot be found on this network \n\nRoutes found: 0');
 	process.exit(1);
     }
 
@@ -197,9 +198,6 @@ Journey.prototype.incDistance = function(amt) {
     }
 }
 
-
-
-
 /**
  * Constructs a network graph from a railway data file.
  *
@@ -223,7 +221,7 @@ function network(fileName){
      let jsonData = railway.readData(fileName);
 
     let graph = {
-                    stationArray : []   // graph object with stationArray property
+                    stationArray : []// graph object with stationArray property
                 };
 
     /* Iterates through each route */
@@ -234,53 +232,48 @@ function network(fileName){
         for (let stop of route.stops) {
             // Check if the station is in the graph, based on stationID
             let stationIndex = 
-	    graph.stationArray.findIndex
-		(station => station.stationID === stop.station);
-            let currentStation;// The current station we are at
+	  graph.stationArray.findIndex(station => station.stationID === stop.stationID);
+            let currentStation;
 
             if (stationIndex === -1) {
                 // If the station doesn't exist in the graph, create and add it
                 currentStation = new Station(stop.stationID, stop.stationName);
                 graph.stationArray.push(currentStation);
             } else {
-                //Reference the existing station from the graph if non existant
+                // Reference the existing station from the graph
                 currentStation = graph.stationArray[stationIndex];
             }
 
-            // Add links between current station and the previous station
-            if (previousStation) {  
-		// This link represents connection from previous to current station
-                let linkFromPreviousToCurrent = 
-                new Link(route.name, previousStation, stop.distanceToPrev || 0);
-		//This link reprsents connection from current station to previous
-                let linkFromCurrentToPrevious
-                = new Link(route.name, currentStation, stop.distanceToPrev || 0);
-                
-		//Add links to their respective stations
-                currentStation.addLink(linkFromPreviousToCurrent);
-                previousStation.addLink(linkFromCurrentToPrevious);
+            // Add links between current station and the next station
+            if (previousStation) {                                                                                                                   //Link from current to previous station
+		let linkFromCurrentToPrevious =
+                new Link(route.name, previousStation, stop.distanceToPrev || 0); 
+		//Link from previous to current station
+                let linkFromPreviousToCurrent
+                = new Link(route.name, currentStation, stop.distanceToPrev || 0); 
+                //Add links pointing to thier respective links
+                currentStation.addLink(linkFromCurrentToPrevious);
+                previousStation.addLink(linkFromPreviousToCurrent);
             }
-
-            //Allows us to have in memory the previous station 
-	    previousStation = currentStation;
+            //Allows us to have in memory the previous station
+            previousStation = currentStation;
         }
     }
 
-    return graph;//Return the constructed graph
+    return graph; // Return the constructed graph
 }
-
 
 /**
  * Finds the best journey(s) between two stations within a railway graph
  * based on a specified number of results.
  *
  * This function initiates the search for the optimal journey(s) from
- * the origin to the destination station within the provided graph. 
+ * the origin to the destination station within the provided graph.
  * It leverages the `doGetBestRoutes` function to explore all possible paths,
- * taking into accountthe limitations such as the maximum 
+ * taking into accountthe limitations such as the maximum
  * number of results to return. The possible journeys are first collected
  * and then sorted based on the number of changes required to reach
- * the destination, with a secondary sort on the total distance of the journey 
+ * the destination, with a secondary sort on the total distance of the journey
  * for journeys requiring an equal number of changes.
  * This allows for sorting of journeys
  * with fewer changes and shorter distances.
@@ -289,11 +282,11 @@ function network(fileName){
  *
  * @param {Object}
  * graph The railway graph object containing an array of stations and their links.
- * @param {string} 
+ * @param {string}
  * origin The name of the origin station from where the journey starts.
  * @param {string}
  * destination The name of the destination station where the journey ends.
- * @param {number} 
+ * @param {number}
  * max_results The maximum number of best journey results to return.
  * @returns {Array}
  * An array of Journey objects representing the top N best journeys from the
@@ -315,7 +308,7 @@ function getBestJourney(graph, origin, destination, max_results){
     //The intial routename for the origin station
     initialRouteName =
 	  graph.stationArray.find(i => i.stationName === origin).links[0].routeName;
-   
+
     //Recursive function where the journeys are discovered and populated
     doGetBestRoutes(graph, originObject, destinationObject, currentJourney,
 	  possibleJourneys, initialRouteName);
@@ -342,45 +335,46 @@ function getBestJourney(graph, origin, destination, max_results){
  * Finds all possible routes from an origin to a destination station
  * within a railway network graph.This function implements a depth-first search
  * algorithm to explore all possible paths from the origin to the destination
- * station. The search avoids cycles by keeping track of visited stations 
+ * station. The search avoids cycles by keeping track of visited stations
  * in a journey object, which is updated as the search progresses.
- * When a destination is reached, the current journey object is cloned 
- * and stored in an array of successful routes. This method 
+ * When a destination is reached, the current journey object is cloned
+ * and stored in an array of successful routes. This method
  * allows for the discovery of multiple paths and their details,
  * such as the stations visited and the total distance traveled.
  *
- * @param {Object} graph - 
- * The graph representing the railway network, where nodes are stations 
+ * @param {Object} graph -
+ * The graph representing the railway network, where nodes are stations
  * and edges are the links between them.
  * @param {Object} origin - The starting station node for the search.
  * @param {Object} destination - The target station node to reach.
- * @param {Object} currentJourney 
- * - An object that tracks the current path being explored, including 
+ * @param {Object} currentJourney
+ * - An object that tracks the current path being explored, including
  * stations visited, total distance, and other relevant journey details.
  * @param {Array} routesFound -
  * An array to store all successful journey objects that reach the destination.
- * @param {String} routeName - 
- * The name of the current route being explored. This is used to update 
+ * @param {String} routeName -
+ * The name of the current route being explored. This is used to update
  * the journey object with the correct route information.
  *
  * The function recursively explores all links from the current station (origin),
  * updating the journey object and cloning it as needed to explore different paths
- * without altering the state of other explorations. 
- * When the destination station is found, the journey is marked as successful, 
+ * without altering the state of other explorations.
+ * When the destination station is found, the journey is marked as successful,
  * cloned, and added to the routesFound array.
- * The function also implements optimization checks 
+ * The function also implements optimization checks
  * to avoid unnecessary cloning and to handle failed explorations when a path
- * does not lead to the destination. 
+ * does not lead to the destination.
  *
  */
-    
 
-function doGetBestRoutes(graph, origin, destination, currentJourney, routesFound, routeName) {
-    
+
+function doGetBestRoutes(graph, origin, destination, currentJourney, routesFound, routeName){
+
     // BASE CASE the current station is the destination station.
     if (origin.stationName === destination.stationName) {
         // Mark the journey as successful
 	currentJourney.success = true;
+	currentJourney.text += `Arrive at ${origin.stationName}`; 
 	// Clone the current journey to safe guard riginal object and
 	    // push it to the routes found.
         routesFound.push(currentJourney.copy());
@@ -388,11 +382,12 @@ function doGetBestRoutes(graph, origin, destination, currentJourney, routesFound
         return;
     }
 
-    
+
     // Iterate over all links (connections) from the current station to linked stations.
     for (let link of origin.links) {
 	// Check station at end of current link has not been visited in this journey.
-        if (!currentJourney.stations.find(station => station.name === link.station.stationName)) {
+        if(!currentJourney.stations.find
+		(station => station.name === link.station.stationName)){
             // Clone explore this new path without altering the original journey
 	    let tempJourney = currentJourney.copy();
 
@@ -404,10 +399,11 @@ function doGetBestRoutes(graph, origin, destination, currentJourney, routesFound
 
             // Update the temporary journey object with information
 		// from the current exploration step.
-	    updateCurrentJourney(tempJourney, origin, link, routeName, journeyUpdate);
+	    updateCurrentJourney(tempJourney, origin, link, routeName);
 
             // Recursively call the function to explore the next station in the path.
-	    doGetBestRoutes(graph, link.station, destination, tempJourney, routesFound, link.routeName);
+	    doGetBestRoutes(graph, link.station, destination,
+		    tempJourney, routesFound, link.routeName);
 
             // If the exploration from this link did not lead to a successful journey
 		// and there are multiple links to explore upon each station
@@ -426,43 +422,46 @@ function doGetBestRoutes(graph, origin, destination, currentJourney, routesFound
  * It adds the new station to the journey's path,
  * updates the total distance traveled, and handles
  * route changes if necessary.
- * 
- * @param {Object} 
+ *
+ * @param {Object}
  * currentJourney -
  * The journey object being updated. Contains details of the journey so far.
  * @param {Object} origin
  * - The station object from which the current leg of the journey begins.
- * @param {Object} link - 
+ * @param {Object} link -
  * The link object representing the connection from the origin to the next station.
- * @param {String} routeName - 
+ * @param {String} routeName -
  * The name of the route currently being followed.
- * @param {Object} journeyUpdate - 
+ * @param {Object} journeyUpdate -
  * An object to store information about the journey before this update.
  */
 
-function updateCurrentJourney(currentJourney, origin, link, routeName, journeyUpdate) {
-    
+function updateCurrentJourney(currentJourney, origin, link, routeName) {
+
+    //If this is a journey first explore the graph will have two stations
+    const journeysFirstExplore = 2;
     //If this is the first station in the journey,
 	//add it as the starting point with a distance of 0.
     if (currentJourney.stations.length === 0) {
         currentJourney.stations.push({ name: origin.stationName, distance: 0 });
     }
 
-    //Add the new station reached via the link, 
+    //Add the new station reached via the link,
 	//along with the distance from the previous station.
     currentJourney.stations.push({ name: link.station.stationName, distance: link.distance });
-    currentJourney.distance += link.distance;
+    currentJourney.incDistance(link.distance);
 
-    // If this is the journey's first exploriation, 
+    // If this is the journey's first exploriation,
 	// append the starting route information to the journey's text description
-    if (currentJourney.stations.length === 2) {
+    if (currentJourney.stations.length === journeysFirstExplore) {
         currentJourney.text += `Embark at ${origin.stationName} on ${link.routeName}. \n`;
     }
-    // If the route changes (excluding the first station and the initial route), 
+    // If the route changes (excluding the first station and the initial route),
 	// increment the change count and update the journey's text description.
-     if (link.routeName !== routeName && currentJourney.stations.length > 2) {
+     if (link.routeName !== routeName && 
+	     currentJourney.stations.length > journeysFirstExplore) {
         currentJourney.changes++;
-        currentJourney.text += `At ${origin.stationName}, change to ${link.routeName}. `;
+        currentJourney.text += `At ${origin.stationName}, change to ${link.routeName}. \n`;
     }
 }
 
@@ -475,11 +474,11 @@ function updateCurrentJourney(currentJourney, origin, link, routeName, journeyUp
  * It rolls back the last step taken in the journey,
  * removing the last visited station and reverting
  * changes made during that exploriation step.
- * 
+ *
  * @param {Object} currentJourney -
  * The journey object being updated.
  *  Contains the current state of the journey.
- * @param {Object} journeyUpdate - 
+ * @param {Object} journeyUpdate -
  * An object containing the state of the journey before the last update.
  * Used to restore the journey's previous state.
  */
@@ -498,17 +497,17 @@ function handleFailedExploration(currentJourney, journeyUpdate) {
 
 
 /**
- * Displays a summary for each route in the provided list of top N results. 
- * Each route's summary includes the route order, a detailed journey text 
- * describing the embarkation point, any changes along the way, and the 
- * arrival station. It also lists the total distance traveled, the number 
+ * Displays a summary for each route in the provided list of top N results.
+ * Each route's summary includes the route order, a detailed journey text
+ * describing the embarkation point, any changes along the way, and the
+ * arrival station. It also lists the total distance traveled, the number
  * of changes made, and all stations passed through during the journey.
- * 
+ *
  * @param {Array} topNResults -
- * An array containing the top N journey objects to display. 
- * Each journey object should contain the journey's text description, 
+ * An array containing the top N journey objects to display.
+ * Each journey object should contain the journey's text description,
  * list of stations, total distance, and number of changes.
- */    
+ */
 function displayRoutes(topNResults) {
     console.log(`Routes found: ${topNResults.length}`);
     topNResults.forEach((journey, index) => {
@@ -518,10 +517,8 @@ function displayRoutes(topNResults) {
         // Embark message
         // Insert journey text which includes changes
         console.log(journey.text.trim());
-        // Arrive message
-        console.log(`Arrive at ${journey.stations[journey.stations.length - 1].name}`);
         // Total distance
-        console.log(`Total distance :${journey.distance}`);
+        console.log(`\nTotal distance :${journey.distance}`);
         // Number of changes
         console.log(`Changes :${journey.changes}`);
         // Passing through
@@ -531,5 +528,5 @@ function displayRoutes(topNResults) {
     });
 }
 
-
+//Calling the main function
 main();
