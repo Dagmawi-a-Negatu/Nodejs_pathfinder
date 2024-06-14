@@ -15,7 +15,8 @@ A terminal or command line interface
 ### Installation
 Download and install Node.js from nodejs.org.
 
-**Setup the Development Enviroment**
+**Setup the Development Enviroment**:
+
 Clone the repository: git clone https://github.com/yourusername/railway-journey.git
 cd railway-journey
 Install dependencies:
