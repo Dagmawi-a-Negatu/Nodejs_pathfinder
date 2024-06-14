@@ -15,19 +15,13 @@ A terminal or command line interface
 ### Installation
 Download and install Node.js from nodejs.org.
 
-### Setup
-Clone the repository:
-sh
-Copy code
-git clone https://github.com/yourusername/railway-journey.git
+### Setup the Development Enviroment
+Clone the repository: git clone https://github.com/yourusername/railway-journey.git
 cd railway-journey
 Install dependencies:
-sh
-Copy code
 npm install
-Project Structure
-kotlin
-Copy code
+
+## Project Structure
 project-root
 │
 ├── app
@@ -46,12 +40,9 @@ project-root
 ├── .gitignore
 ├── package.json
 ├── README.md
-Setting Up Development Environment
-Follow the steps outlined above to set up Node.js and install the necessary dependencies to streamline your development process.
+.
 
-Basic Folder Structure
-Organize your project with the following folder structure and configuration for efficient development:
-
+## Basic Folder Structure
 app/: Contains the main application logic.
 data/: Contains various JSON files representing different railway networks.
 src/: Contains the main scripts for running the network analysis.
@@ -61,28 +52,22 @@ Root Directory:
 .gitignore: Git ignore file.
 package.json: Node.js project metadata and dependencies.
 README.md: Project README file.
-Usage
-To use the Railway Journey Planner, run the following command in your terminal, replacing the placeholders with your specific information:
 
-sh
-Copy code
+## Usage
+To use the Railway Journey Planner, run the following command in your terminal, replacing the placeholders with your specific information:
 node src/network.js <data/railtrack_file.json> <origin> <destination> <max_transfers>
 <data/railtrack_file.json>: Path to the JSON file containing the railway network graph.
 <origin>: The name of the origin station.
 <destination>: The name of the destination station.
 <max_transfers>: The maximum number of transfers allowed for the journey.
-Example
-sh
-Copy code
+
+## Example
 node src/network.js data/railtrack_uk.json "Edinburgh" "London" 3
 This command searches for routes from "Edinburgh" to "London" with a maximum of 3 transfers, using the railway network defined in data/railtrack_uk.json.
 
-Project Notes
-This is an example of a railway network. A railway network can be built from large data sets of JSON files and then traversed to find the shortest path between two stations. This is one example of a railway system that I built and traversed. One of the many great things I am learning in one simple project in a course. Recursion can get confusing when working with a large dataset and objects have very complex relationships.
+## Acknowledgments
+Inspired by various railway systems and algorithms. Special thanks to all viewers.
 
-Acknowledgments
-Inspired by various railway systems and algorithms. Special thanks to all contributors and reviewers.
-
-Contact
+## Contact
 For any issues, please reach out to dagmawi.negatu@gmail.com.
 
