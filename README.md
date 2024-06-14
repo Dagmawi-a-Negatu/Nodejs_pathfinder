@@ -40,5 +40,3 @@ Project Notes
 This is an example of a railway network. A railway network can be built from large data sets of JSON files and then traversed to find the shortest path between two stations. This is one example of a railway system that I built and traversed. One of the many great things I am learning in one simple project in a course. Recursion can get confusing when working with a large dataset and objects have very complex relationships.
 
 Visual Representation
-
-This version of the README is more structured, includes all the necessary details, and integrates the image you've provided for visual representation. Adjust the path/to/your/uploaded/image.png with the correct path to the uploaded image in your project directory.
