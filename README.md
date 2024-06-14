@@ -1,10 +1,14 @@
-Railway Journey
-Overview
+# Railway Application
+
+## Overview
 Welcome to the Railway Journey! This command-line application is designed to find the best routes between two railway stations within a given network. Leveraging a comprehensive railway network graph, the application calculates possible journeys from an origin to a destination station, taking into account the number of allowed transfers.
 
 
-Getting Started
-Prerequisites![Railway Networks](https://github.com/Dagmawi-a-Negatu/UK-Railway-Networks/assets/117816205/944664ba-c353-4c46-b47e-e5b967d7bb2a)
+![Railway Networks](https://github.com/Dagmawi-a-Negatu/UK-Railway-Networks/assets/117816205/944664ba-c353-4c46-b47e-e5b967d7bb2a)
+
+## Getting Started
+
+### Prerequisites
 
 Node.js
 A terminal or command line interface
