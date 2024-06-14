@@ -12,8 +12,10 @@ Welcome to the Railway Journey! This command-line application is designed to fin
 
 Node.js
 A terminal or command line interface
-Installation
+### Installation
 Download and install Node.js from nodejs.org.
+
+### Setup
 Clone the repository:
 sh
 Copy code
