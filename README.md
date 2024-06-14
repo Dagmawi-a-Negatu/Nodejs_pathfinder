@@ -4,7 +4,8 @@ Welcome to the Railway Journey! This command-line application is designed to fin
 
 
 Getting Started
-Prerequisites
+Prerequisites![Railway Networks](https://github.com/Dagmawi-a-Negatu/UK-Railway-Networks/assets/117816205/944664ba-c353-4c46-b47e-e5b967d7bb2a)
+
 Node.js
 A terminal or command line interface
 Installation
