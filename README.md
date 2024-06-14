@@ -8,14 +8,14 @@ Welcome to the Railway Journey! This command-line application is designed to fin
 
 ## Getting Started
 
-### Prerequisites
-
+**Prerequisites**
 Node.js
 A terminal or command line interface
+
 ### Installation
 Download and install Node.js from nodejs.org.
 
-### Setup the Development Enviroment
+**Setup the Development Enviroment**
 Clone the repository: git clone https://github.com/yourusername/railway-journey.git
 cd railway-journey
 Install dependencies:
@@ -42,18 +42,9 @@ project-root
 ├── README.md
 .
 
-## Basic Folder Structure
-app/: Contains the main application logic.
-data/: Contains various JSON files representing different railway networks.
-src/: Contains the main scripts for running the network analysis.
-network.js: Main script to run the network analysis.
-railway.js: Core logic for the railway network.
-Root Directory:
-.gitignore: Git ignore file.
-package.json: Node.js project metadata and dependencies.
-README.md: Project README file.
 
-## Usage
+
+**Usage**
 To use the Railway Journey Planner, run the following command in your terminal, replacing the placeholders with your specific information:
 node src/network.js <data/railtrack_file.json> <origin> <destination> <max_transfers>
 <data/railtrack_file.json>: Path to the JSON file containing the railway network graph.
@@ -61,7 +52,7 @@ node src/network.js <data/railtrack_file.json> <origin> <destination> <max_trans
 <destination>: The name of the destination station.
 <max_transfers>: The maximum number of transfers allowed for the journey.
 
-## Example
+**Example**
 node src/network.js data/railtrack_uk.json "Edinburgh" "London" 3
 This command searches for routes from "Edinburgh" to "London" with a maximum of 3 transfers, using the railway network defined in data/railtrack_uk.json.
 
